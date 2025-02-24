@@ -1,3 +1,5 @@
+from classification_starter_2 import process_subject
+
 # Tai Chi Movement Classification using KNN and LOSO Cross-validation
 
 ## Project Overview
@@ -30,7 +32,7 @@ scipy
 ```
 
 ## Core Functions
-### Data Loading
+### Data Loading Load_dataset func
 ```python
 load_dataset(verbose: bool = True,
             subject_index: int = 9,
@@ -42,7 +44,7 @@ load_dataset(verbose: bool = True,
             n_neighbors: int = 5)
 ```
 
-### Feature Selection
+### Feature Selection using SFS
 ```python
 def sequential_forward_selection(X: np.ndarray, y: np.ndarray,
                                n_features: int = 10,
@@ -57,6 +59,14 @@ def fisher_projection(X: np.ndarray, y: np.ndarray, n_components: int = None) ->
 ```
 Applies Fisher’s Linear Discriminant Analysis to reduce dimensionality while preserving class separability.
 
+
+### Process Subjects; Runs the iterative process for the LOSO 
+```python
+process_subject(params)
+```
+
+
+
 ### Classification
 ```python
 def classification(dataset_types: List[int] = [200, 300],
@@ -65,12 +75,12 @@ def classification(dataset_types: List[int] = [200, 300],
                   n_neighbors: int = 5)
 ```
 
-### Training Progress and Confusion Matrices
-```python
-plot_training_progress(accuracies: List[float],
-                      dataset_type: int)
-```
 
+### Main: starts the classifier processes for MLP or Traditional and oversees
+### ensures the iterative run of the dataset  for the [100, 200, 300]
+```python
+def main()
+```
 ## Results
 The system generates various visualization outputs:
 

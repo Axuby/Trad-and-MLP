@@ -22,7 +22,7 @@ from scipy import linalg
 from typing import Callable, Dict, List, Tuple, Optional
 from scipy import linalg
 from typing import Callable, Dict, List, Tuple, Optional
-from utils import plot_dataset_comparison, plot_feature_heatmap, plot_training_progress, plot_feature_importance, \
+from utils_a import plot_dataset_comparison, plot_feature_heatmap, plot_training_progress, plot_feature_importance, \
     calculate_feature_criterion, sequential_forward_selection, feature_selection
 
 
