@@ -81,4 +81,4 @@ venv.bak/
 
 
 project_2_env
-.env
+.envTaiji_dataset_*.csv
