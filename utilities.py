@@ -17,7 +17,6 @@ from scipy import linalg
 from typing import Dict, List, Callable, Tuple, Optional, Union
 
 
-
 def sequential_forward_selection(X: np.ndarray, y: np.ndarray,
                                  n_features: int = 10,
                                  cv_splits: int = 5,

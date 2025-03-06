@@ -1,118 +1,135 @@
-from classification_starter_2 import process_subject
+# Taiji Movement Classification System Using an MLP and Traditional Classifier
 
-# Tai Chi Movement Classification using KNN and LOSO Cross-validation
+## Overview
+This project implements a machine learning system for classifying Taiji movements using sensor data. It supports both traditional classification methods and deep neural networks, with comprehensive feature processing, evaluation, and visualization capabilities.
 
-## Project Overview
-This project implements a machine learning system for classifying Tai Chi movements using K-Nearest Neighbors (KNN) classification with Leave-One-Subject-Out (LOSO) cross-validation. The system employs advanced feature selection techniques including mRMR (Minimum Redundancy Maximum Relevance) and Sequential Forward Selection (SFS) to optimize performance.
+## Features
+- Processes three different Taiji movement datasets (100, 200, 300)
+- Implements leave-one-subject-out (LOSO) cross-validation
+- Supports feature selection via Sequential Forward Selection (SFS)
+- Optional dimensionality reduction using Fisher Linear Discriminant Analysis (LDA)
+- Includes both traditional and deep learning classification approaches
+- Extensive performance evaluation and visualization tools
+- Lastly, Optional dimensionality reduction using Principal Component Analysis (PCA)
 
-## Architecture
-![System Architecture](path/to/image)
+## Requirements
+- Python 3.6+
+- PyTorch
+- NumPy
+- scikit-learn
+- Matplotlib
+- Seaborn
 
-The system consists of four main components:
+## Project Structure
 
-- **Data Loading & Preprocessing**
-- **Feature Selection Pipeline**
-- **KNN Classification**
-- **Results Visualization**
+### Core Components
 
-## Key Features
-- Leave-One-Subject-Out (LOSO) cross-validation for robust generalization testing
-- Two-stage feature selection combining mRMR and Sequential Forward Selection
-- Comprehensive visualization suite for performance analysis
-- Support for multiple dataset types (100, 200, 300)
+- `fisher_projection`: Custom implementation of Fisher Linear Discriminant Analysis for dimensionality reduction
+- `deep_learning`: Implementation of MLP training and evaluation with comprehensive metrics tracking
+- `convert_features_to_loader`: Utility to create PyTorch DataLoaders from feature matrices
+- `load_dataset`: Loads and preprocesses the Taiji datasets
+- `apply_feature_processing`: Applies feature selection and optional LDA projection, (now includes PCA)
+- `process_subject`: Processes a single subject for leave-one-subject-out validation
+- `classification`: Main classification pipeline with support for multiple configurations
+- `main`: Orchestrates the complete classification pipeline for all datasets and configurations [100, 200, 200]
 
-## Basic Requirements to Run
-```
-numpy
-torch
-sklearn
-matplotlib
-seaborn
-scipy
-```
+### Helper Functions
 
-## Core Functions
-### Data Loading Load_dataset func
+- `plot_training_curves_main`: Generates training and validation curves
+- `plot_confusion_matrix`: Creates confusion matrix visualizations
+- `plot_visualizations`: Generates all visualizations for a subject
+- `print_results_summary`: Prints comprehensive results summary
+- `create_results_directory`: Sets up directory structure for results
+- `update_performance_summary`: Updates the performance summary dictionary
+- `save_detailed_results`: Saves detailed results to files
+- `generate_comparative_visualizations`: Creates comparative visualizations across configurations
+- `print_dataset_statistics`: Prints dataset characteristics
+- `print_dataset_results`: Prints results for a specific dataset
+
+## Usage
+
+1. Ensure the dataset files (`Taiji_dataset_100.csv`, `Taiji_dataset_200.csv`, and `Taiji_dataset_300.csv`) are in the working directory
+2. Run the main script:
+
 ```python
-load_dataset(verbose: bool = True,
-            subject_index: int = 9,
-            dataset_type: int = 100,
-            use_feature_selection: bool = True,
-            selection_method: str = 'mrmr',
-            n_features: int = 10,
-            use_sfs: bool = False,
-            n_neighbors: int = 5)
+python classification_starter.py
 ```
 
-### Feature Selection using SFS
-```python
-def sequential_forward_selection(X: np.ndarray, y: np.ndarray,
-                               n_features: int = 10,
-                               cv_splits: int = 5,
-                               n_neighbors: int = 5)
-```
-Implements Sequential Forward Selection for optimal feature subset selection.
+3. Results will be stored in the `results/` directory with the following structure:
+   - Detailed metrics for each configuration
+   - Confusion matrices
+   - Training and validation curves
+   - Feature importance visualizations
+   - Summary reports and comparative analyses
 
-### Fisher Projection
-```python
-def fisher_projection(X: np.ndarray, y: np.ndarray, n_components: int = None) -> Tuple[np.ndarray, np.ndarray]:
-```
-Applies Fisher’s Linear Discriminant Analysis to reduce dimensionality while preserving class separability.
+## Function Descriptions
 
+### Main Processing Functions
 
-### Process Subjects; Runs the iterative process for the LOSO 
-```python
-process_subject(params)
-```
+#### `fisher_projection(X, y, n_components)`
+Implements Fisher Linear Discriminant Analysis for dimensionality reduction.
+- **Parameters**:
+  - `X`: Input features matrix
+  - `y`: Target labels
+  - `n_components`: Number of components to keep
+- **Returns**: Projection matrix and explained variance ratio
 
+#### `deep_learning(train_feats_proj, train_labels, test_feats_proj, test_labels, input_dim, output_dim, hidden_dim, num_layers, batch_size, learning_rate, epochs)`
+Trains and evaluates an MLP model with comprehensive metrics tracking.
+- **Parameters**:
+  - Training and testing data
+  - Model configuration parameters
+  - Training hyperparameters
+- **Returns**: Trained model, final metrics, and training history
 
+#### `load_dataset(verbose, dataset_type)`
+Loads the specified Taiji dataset.
+- **Parameters**:
+  - `verbose`: Whether to print dataset information
+  - `dataset_type`: Dataset identifier (100, 200, or 300)
+- **Returns**: Features, labels, and subject identifiers
 
-### Classification
-```python
-def classification(dataset_types: List[int] = [200, 300],
-                  use_lda: bool = True,
-                  n_features: int = 10,
-                  n_neighbors: int = 5)
-```
+#### `apply_feature_processing(X_train, X_val, X_test, y_train, use_lda)`
+Applies feature selection and optional LDA projection.
+- **Parameters**:
+  - Training, validation, and test feature matrices
+  - Training labels
+  - Whether to use LDA
+- **Returns**: Processed feature matrices, selected features, and feature scores
 
+#### `process_subject(subject_idx, features, labels, subjects, dataset_type, model_type, use_lda)`
+Processes a single subject for leave-one-subject-out validation.
+- **Parameters**:
+  - Subject identifier and dataset
+  - Configuration parameters
+- **Returns**: Subject-specific results dictionary
 
-### Main: starts the classifier processes for MLP or Traditional and oversees
-### ensures the iterative run of the dataset  for the [100, 200, 300]
-```python
-def main()
-```
+#### `classification(features, labels, subjects, dataset_type, model_type, use_lda, use_pca)`
+Performs classification with optional LDA projection and a PCA(use_pca param, but preference is
+given to use_lda, LDA projection) and LOSO cross-validation.
+- **Parameters**:
+  - Dataset matrices
+  - Configuration options
+- **Returns**: Mean metrics, standard deviations, and aggregated results
+
+### Utility Functions
+
+#### `convert_features_to_loader(train_feats, train_labels, test_feats, test_labels, batch_size)`
+Converts feature matrices to PyTorch DataLoaders.
+- **Parameters**: Feature matrices, labels, and batch size
+- **Returns**: Training and test DataLoaders
+
+#### `print_results_summary(mean_metrics, std_metrics, aggregated_results)`
+Prints a comprehensive summary of classification results.
+- **Parameters**: Performance metrics and aggregated results
+
 ## Results
-The system generates various visualization outputs:
-
-- Feature importance plots
+The system generates comprehensive results including:
+- Performance metrics (accuracy, F1 score, precision, recall)
 - Confusion matrices
-- Training progress graphs
-- Dataset comparisons
+- Training and validation curves
+- Feature importance visualizations
+- Comparative analyses across configurations
 
-Results are saved in the `results/` directory.
-
-## Feature Selection Process
-- Initial feature ranking using mRMR
-- Selection of top K features
-- Sequential Forward Selection for optimal subset
-- Final feature set used for classification
-
-## Cross-validation Strategy
-- Leave-One-Subject-Out (LOSO) approach
-- Training on 9 subjects, testing on 1
-- Ensures robust generalization testing
-- Repeats for all subjects
-
-## Performance Metrics
-- Accuracy
-- Precision
-- Recall
-- F1-score
-- Confusion matrices
-
-## Contributing
-Feel free to submit issues and enhancement requests.
-
-## License
-This project is licensed under the MIT License - see the LICENSE file for details.
-
+## Author
+Azubuine Samuel Tochukwu

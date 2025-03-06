@@ -402,20 +402,57 @@ def plot_class_distribution(y_true, y_pred):
     plt.legend()
 
 
+
 def plot_metrics_over_time(train_metrics, val_metrics):
-    """Plot multiple metrics over training time."""
-    epochs = range(1, len(train_metrics['acc']) + 1)
+    """Plot metrics over time (epochs) for training and validation."""
+    plt.figure(figsize=(15, 5))
 
-    plt.plot(epochs, train_metrics['acc'], 'b-', label='Train Acc')
-    plt.plot(epochs, train_metrics['f1'], 'g-', label='Train F1')
-    plt.plot(epochs, val_metrics['acc'], 'r-', label='Val Acc')
-    plt.plot(epochs, val_metrics['f1'], 'm-', label='Val F1')
+    # Plot 1: Accuracy
+    plt.subplot(1, 3, 1)
+    if 'acc' in train_metrics and len(train_metrics['acc']) > 0:
+        epochs = range(1, len(train_metrics['acc']) + 1)
+        plt.plot(epochs, train_metrics['acc'], 'b-', label='Train Accuracy')
+        if 'acc' in val_metrics and len(val_metrics['acc']) == len(epochs):
+            plt.plot(epochs, val_metrics['acc'], 'r-', label='Validation Accuracy')
+        plt.title('Accuracy over Epochs')
+        plt.xlabel('Epoch')
+        plt.ylabel('Accuracy')
+        plt.legend()
+    else:
+        plt.title('Accuracy (No Data Available)')
+        plt.axis('off')
 
-    plt.title('Performance Metrics Over Time')
-    plt.xlabel('Epoch')
-    plt.ylabel('Score')
-    plt.legend()
+    # Plot 2: Loss
+    plt.subplot(1, 3, 2)
+    if 'loss' in train_metrics and len(train_metrics['loss']) > 0:
+        epochs = range(1, len(train_metrics['loss']) + 1)
+        plt.plot(epochs, train_metrics['loss'], 'b-', label='Train Loss')
+        if 'loss' in val_metrics and len(val_metrics['loss']) == len(epochs):
+            plt.plot(epochs, val_metrics['loss'], 'r-', label='Validation Loss')
+        plt.title('Loss over Epochs')
+        plt.xlabel('Epoch')
+        plt.ylabel('Loss')
+        plt.legend()
+    else:
+        plt.title('Loss (No Data Available)')
+        plt.axis('off')
 
+    # Plot 3: F1 Score
+    plt.subplot(1, 3, 3)
+    if 'f1' in train_metrics and len(train_metrics['f1']) > 0:
+        epochs = range(1, len(train_metrics['f1']) + 1)
+        plt.plot(epochs, train_metrics['f1'], 'g-', label='Train F1')
+        if 'f1' in val_metrics and len(val_metrics['f1']) == len(epochs):
+            plt.plot(epochs, val_metrics['f1'], 'r-', label='Validation F1')
+        plt.title('F1 Score over Epochs')
+        plt.xlabel('Epoch')
+        plt.ylabel('F1 Score')
+        plt.legend()
+    else:
+        plt.title('F1 Score (No Data Available)')
+        plt.axis('off')
+
+    plt.tight_layout()
 
 def plot_error_analysis(y_true, y_pred):
     """Plot error analysis showing misclassification patterns."""
@@ -521,61 +558,6 @@ def plot_confusion_matrix(true_labels, pred_labels, num_classes):
 
 
 
-
-
-def plot_visualizations(y_val, y_test, val_pred, test_pred, train_metrics, val_metrics,
-                        subject_idx, model_name, dataset_type, selected_features, feature_scores):
-    """Enhanced visualization function that plots all relevant metrics."""
-    plt.figure(figsize=(20, 10))
-
-    # Plot 1: Confusion Matrix
-    plt.subplot(2, 3, 1)
-    cm = confusion_matrix(y_test, test_pred)
-    sns.heatmap(cm, annot=True, fmt='d', cmap='Blues')
-    plt.title(f'Confusion Matrix (Subject {subject_idx})')
-    plt.xlabel('Predicted')
-    plt.ylabel('True')
-
-    # Plot 2: Training & Validation Accuracy
-    plt.subplot(2, 3, 2)
-    if train_metrics and 'acc' in train_metrics:
-        plt.plot(train_metrics['acc'], label='Train')
-        plt.plot(val_metrics['acc'], label='Validation')
-        plt.title('Accuracy over Epochs')
-        plt.xlabel('Epoch')
-        plt.ylabel('Accuracy')
-        plt.legend()
-
-    # Plot 3: Training & Validation Loss
-    plt.subplot(2, 3, 3)
-    if train_metrics and 'loss' in train_metrics:
-        plt.plot(train_metrics['loss'], label='Train')
-        plt.plot(val_metrics['loss'], label='Validation')
-        plt.title('Loss over Epochs')
-        plt.xlabel('Epoch')
-        plt.ylabel('Loss')
-        plt.legend()
-
-    # Plot 4: F1 Scores
-    plt.subplot(2, 3, 4)
-    if train_metrics and 'f1' in train_metrics:
-        plt.plot(train_metrics['f1'], label='Train')
-        plt.plot(val_metrics['f1'], label='Validation')
-        plt.title('F1 Score over Epochs')
-        plt.xlabel('Epoch')
-        plt.ylabel('F1 Score')
-        plt.legend()
-
-    # Plot 5: Feature Importance
-    plt.subplot(2, 3, 5)
-    plt.bar(range(len(feature_scores)), feature_scores)
-    plt.title('Feature Importance Scores')
-    plt.xlabel('Feature Index')
-    plt.ylabel('Importance Score')
-
-    plt.tight_layout()
-    plt.savefig(f'results/metrics_subject_{subject_idx}_{model_name}_dataset_{dataset_type}.png')
-    plt.close()
 
 def plot_aggregate_confusion_matrix(cm, model_name, dataset_type):
     """Plot and save aggregate confusion matrix."""

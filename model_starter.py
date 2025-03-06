@@ -2,142 +2,87 @@
 Name : Azubuine Samuel Tochukwu
 PSU ID: 960826967
 EE552 Project 2
+
+Process Flow and function calls:
+
+The Main function ===>> Classification ===> Process_subjects( for each subject of LOSO dataset split) ===> Picks model_type function to run
+ Then either the TraditionalClassifier or the deep_learning function executes
+
+ Then Plot_Visualizations to plot identified metrics of performance and others including confusion matrix,
+ class distribution, mis-classification rate, feature importance and  etc.
+
 }
 '''
-from networkx.classes import neighbors
-import torch
 import torch.nn as nn
-import torch.optim as optim
-# from torch.utils.data import DataLoader, TensorDataset
 from sklearn.neighbors import KNeighborsClassifier
-from sklearn.preprocessing import StandardScaler
-import numpy as np
+from sklearn.metrics import accuracy_score
+
 
 
 class TraditionalClassifier(KNeighborsClassifier):
-    """
-    Traditional KNN classifier with integrated scaling
+    """KNN-based classifier with an evaluate method"""
 
-    This implementation extends the standard KNeighborsClassifier with:
-    - Integrated feature scaling
-    - Enhanced prediction methods
-    - Additional metrics tracking if you want
-    """
+    def __init__(self, n_neighbors=10):
+        super().__init__(n_neighbors=n_neighbors)
 
-    def __init__(self, n_neighbors: int = 5, **kwargs):
-        """
-        Initialize the classifier
+    def evaluate(self, X_train, y_train, X_val, y_val, X_test, y_test):
+        """Evaluates model performance on train, validation and test sets."""
+        self.fit(X_train, y_train)
 
-        Args:
-            n_neighbors: Number of neighbors for KNN
-            **kwargs: Additional arguments for KNeighborsClassifier
-        """
-        super().__init__(n_neighbors=n_neighbors, **kwargs)
-        self.scaler = StandardScaler()
-        self.classes_ = None
-        self.feature_weights_ = None
+        train_pred = self.predict(X_train)
+        val_pred = self.predict(X_val)
+        test_pred = self.predict(X_test)
 
-    def fit(self, X: np.ndarray, y: np.ndarray) -> 'TraditionalClassifier':
-        """
-        Fit the classifier
+        train_accuracy = accuracy_score(y_train, train_pred)
+        val_accuracy = accuracy_score(y_val, val_pred)
+        test_accuracy = accuracy_score(y_test, test_pred)
 
-        Args:
-            X: Training features
-            y: Training labels
+        return {
+            'train_acc': train_accuracy,
+            'val_acc': val_accuracy,
+            'test_acc': test_accuracy,
+            'train_pred': train_pred,
+            'val_pred': val_pred,
+            'test_pred': test_pred
+        }
 
-        Returns:
-            self: The fitted classifier
-        """
-        # Store unique classes
-        self.classes_ = np.unique(y)
-
-        # Calculate feature weights based on variance
-        self.feature_weights_ = np.var(X, axis=0)
-        self.feature_weights_ = self.feature_weights_ / np.sum(self.feature_weights_)
-
-        # Scale features
-        X_scaled = self.scaler.fit_transform(X)
-
-        # Fit the base classifier
-        return super().fit(X_scaled, y)
-
-    def predict(self, X: np.ndarray) -> np.ndarray:
-        """
-        Predict class labels
-
-        Args:
-            X: Test features
-
-        Returns:
-            Predicted class labels
-        """
-        if X.shape[0] == 0:
-            return np.array([])
-
-        # Scale features
-        X_scaled = self.scaler.transform(X)
-
-        return super().predict(X_scaled)
-
-    def predict_proba(self, X: np.ndarray) -> np.ndarray:
-        """
-        Predict class probabilities
-
-        Args:
-            X: Test features
-
-        Returns:
-            Class probabilities
-        """
-        if X.shape[0] == 0:
-            return np.array([])
-
-        # Scale features
-        X_scaled = self.scaler.transform(X)
-
-        return super().predict_proba(X_scaled)
-
-    def score(self, X: np.ndarray, y: np.ndarray) -> float:
-        """
-        Calculate accuracy score
-
-        Args:
-            X: Test features
-            y: True labels
-
-        Returns:
-            Accuracy score
-        """
-        return np.mean(self.predict(X) == y)
-
-    def get_feature_importance(self) -> np.ndarray:
-        """
-        Get feature importance scores based on variance
-
-        Returns:
-            Array of feature importance scores
-        """
-        return self.feature_weights_ if self.feature_weights_ is not None else None
 
 
 class MLP(nn.Module):
+    """
+    Multi-layer Perceptron for classification.
+
+    Args:
+        input_dim (int): Number of input features.
+        output_dim (int): Number of classes.
+        hidden_dim (int, optional): Size of hidden layers. Default is 128.
+        activation (nn.Module, optional): Activation function class. Default is nn.ReLU.
+        num_layers (int, optional): Number of hidden layers. Default is 2.
+    """
+
     def __init__(self, input_dim, output_dim, hidden_dim=128, activation=nn.ReLU, num_layers=2):
         super(MLP, self).__init__()
+
         layers = []
 
         # Input layer
         layers.append(nn.Linear(input_dim, hidden_dim))
         layers.append(activation())
+        layers.append(nn.BatchNorm1d(hidden_dim))  # Normalize activations
+        layers.append(nn.Dropout(0.3))  # Prevent overfitting
 
         # Hidden layers
         for _ in range(num_layers - 1):
             layers.append(nn.Linear(hidden_dim, hidden_dim))
             layers.append(activation())
+            layers.append(nn.BatchNorm1d(hidden_dim))
+            layers.append(nn.Dropout(0.3))
 
-        # Output layer
+        # Output layer (No activation function for logits)
         layers.append(nn.Linear(hidden_dim, output_dim))
 
         self.model = nn.Sequential(*layers)
 
     def forward(self, x):
         return self.model(x)
+
